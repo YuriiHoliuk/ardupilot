@@ -2064,7 +2064,6 @@ private:
 class ModeAutoHeading : public Mode {
 
 public:
-
     // inherit constructor
     using Mode::Mode;
     Number mode_number() const override { return Number::AUTOHEADING; }
@@ -2088,18 +2087,30 @@ public:
 #endif
 
 protected:
-
     const char *name() const override { return "AUTOHEADING"; }
     const char *name4() const override { return "AHED"; }
 
 private:
-
-    float target_heading_cd; // target heading in centidegrees (0-36000)
-    bool target_heading_set; // true if target heading has been set
-    uint32_t mode_start_time_ms; // time when mode was activated
+    // AutoHeading specific parameters
+    static constexpr float HARDCODED_HEADING_DEG = 90.0f; // East direction
+    static constexpr float FORWARD_PITCH_DEG = 5.0f;     // Initial forward pitch
+    static constexpr float TARGET_THROTTLE = 0.5f;       // Target 50% throttle
     
-    // Hardcoded target heading (can be made configurable later)
-    static constexpr float HARDCODED_HEADING_DEG = 90.0f; // 90 degrees (East)
-    static constexpr float FORWARD_THROTTLE_PERCENT = 0.5f; // 50% throttle
-    static constexpr float FORWARD_PITCH_DEG = 5.0f; // 5 degrees forward pitch for movement
+    // State variables
+    bool target_heading_set;
+    float target_heading_cd;
+    uint32_t mode_start_time_ms;
+    
+    // Throttle-to-pitch PID controller (using proven balance bot gains, inverted for our use case)
+    // This adjusts pitch to maintain target throttle, based on AR_AttitudeControl's _pitch_to_throttle_pid
+    AC_PID _throttle_to_pitch_pid{
+        1.8f,    // P gain: aggressive response to throttle error (from AR_ATTCONTROL_PITCH_THR_P)
+        1.5f,    // I gain: eliminate steady-state throttle error (from AR_ATTCONTROL_PITCH_THR_I) 
+        0.03f,   // D gain: respond to rate of throttle change (from AR_ATTCONTROL_PITCH_THR_D)
+        0.0f,    // FF gain: feedforward (not needed for this application)
+        1.0f,    // imax: maximum integrator contribution in degrees (from AR_ATTCONTROL_PITCH_THR_IMAX)
+        0.0f,    // filt_T_hz: target filter frequency (disabled)
+        10.0f,   // filt_E_hz: error filter frequency (from AR_ATTCONTROL_PITCH_THR_FILT)
+        10.0f    // filt_D_hz: derivative filter frequency (from AR_ATTCONTROL_PITCH_THR_FILT)
+    };
 };

@@ -5,8 +5,8 @@
  * This mode works without GPS positioning (like althold)
  * Maintains altitude automatically
  * Rotates to a hardcoded angle using compass/IMU
- * Flies forward in that direction with 50% throttle
- * Uses pitch to maintain altitude
+ * Flies forward in that direction with 50% throttle (controlled by adjusting pitch)
+ * Uses throttle-to-pitch PID feedback to maintain target throttle
  */
 
 // autoheading_init - initialise autoheading controller
@@ -25,6 +25,10 @@ bool ModeAutoHeading::init(bool ignore_checks)
     target_heading_set = false;
     target_heading_cd = HARDCODED_HEADING_DEG * 100.0f; // convert to centidegrees
     mode_start_time_ms = AP_HAL::millis();
+    
+    // reset the throttle-to-pitch PID controller
+    _throttle_to_pitch_pid.reset_I();
+    _throttle_to_pitch_pid.reset_filter();
 
     return true;
 }
@@ -63,11 +67,26 @@ void ModeAutoHeading::run()
     float target_roll = 0.0f;
     float target_pitch = 0.0f;
     
-    // once we're close to target heading, start forward flight
+    // once we're close to target heading, start forward flight with throttle control
     if (fabsf(heading_error_cd) < 2000.0f) { // within 20 degrees
-        // Apply forward pitch for movement
-        target_pitch = -FORWARD_PITCH_DEG * 100.0f; // negative for forward (body frame)
         target_heading_set = true;
+        
+        // Get current throttle output from attitude controller
+        float current_throttle = attitude_control->get_throttle_in();
+        
+        // Calculate throttle error (target is 50%)
+        float throttle_error = TARGET_THROTTLE - current_throttle;
+        
+        // Use PID controller to determine pitch adjustment based on throttle error
+        // If throttle > 50%, we need more negative pitch (nose down) to reduce lift
+        // If throttle < 50%, we need more positive pitch (nose up) to increase lift
+        float pitch_adjustment_deg = _throttle_to_pitch_pid.update_all(throttle_error, 0.0f, G_Dt);
+        
+        // Constrain pitch adjustment to reasonable limits
+        pitch_adjustment_deg = constrain_float(pitch_adjustment_deg, -15.0f, 15.0f);
+        
+        // Start with baseline forward pitch and add PID adjustment
+        target_pitch = (-FORWARD_PITCH_DEG + pitch_adjustment_deg) * 100.0f; // negative for forward, convert to centidegrees
     }
 
     // get pilot desired climb rate (allow altitude adjustment)
@@ -87,6 +106,8 @@ void ModeAutoHeading::run()
         target_roll = 0.0f;
         target_pitch = 0.0f;
         target_yaw_rate = 0.0f;
+        // Reset PID when motors stopped
+        _throttle_to_pitch_pid.reset_I();
         break;
 
     case AltHoldModeState::Landed_Ground_Idle:
@@ -99,6 +120,8 @@ void ModeAutoHeading::run()
         target_roll = 0.0f;
         target_pitch = 0.0f;
         target_yaw_rate = 0.0f;
+        // Reset PID when landed
+        _throttle_to_pitch_pid.reset_I();
         break;
 
     case AltHoldModeState::Takeoff:
