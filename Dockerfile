@@ -13,8 +13,15 @@ ARG SKIP_AP_COV_ENV=1
 ARG SKIP_AP_GIT_CHECK=1
 ARG DO_AP_STM_ENV=1
 
-RUN groupadd ${USER_NAME} --gid ${USER_GID}\
-    && useradd -l -m ${USER_NAME} -u ${USER_UID} -g ${USER_GID} -s /bin/bash
+# Create group if it doesn't exist, otherwise use existing group
+RUN if ! getent group ${USER_GID} >/dev/null 2>&1; then \
+        groupadd ${USER_NAME} --gid ${USER_GID}; \
+    else \
+        groupadd ${USER_NAME} || true; \
+    fi
+
+# Create user
+RUN useradd -l -m ${USER_NAME} -u ${USER_UID} -g $(getent group ${USER_GID} | cut -d: -f1 || echo ${USER_NAME}) -s /bin/bash
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
     lsb-release \

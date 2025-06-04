@@ -100,6 +100,7 @@ public:
         AUTOROTATE =   26,  // Autonomous autorotation
         AUTO_RTL =     27,  // Auto RTL, this is not a true mode, AUTO will report as this mode if entered to perform a DO_LAND_START Landing sequence
         TURTLE =       28,  // Flip over after crash
+        AUTOHEADING =  29,  // Automatic heading and forward flight with altitude hold
 
         // Mode number 30 reserved for "offboard" for external/lua control.
 
@@ -2059,3 +2060,46 @@ private:
 
 };
 #endif
+
+class ModeAutoHeading : public Mode {
+
+public:
+
+    // inherit constructor
+    using Mode::Mode;
+    Number mode_number() const override { return Number::AUTOHEADING; }
+
+    bool init(bool ignore_checks) override;
+    void run() override;
+
+    bool requires_GPS() const override { return false; }
+    bool has_manual_throttle() const override { return false; }
+    bool allows_arming(AP_Arming::Method method) const override { return true; }
+    bool is_autopilot() const override { return false; }
+    bool has_user_takeoff(bool must_navigate) const override { return true; }
+    bool allows_autotune() const override { return true; }
+    bool allows_flip() const override { return true; }
+    bool allows_auto_trim() const override { return true; }
+    bool allows_save_trim() const override { return true; }
+    bool use_pilot_yaw() const override { return false; }
+
+#if FRAME_CONFIG == HELI_FRAME
+    bool allows_inverted() const override { return true; }
+#endif
+
+protected:
+
+    const char *name() const override { return "AUTOHEADING"; }
+    const char *name4() const override { return "AHED"; }
+
+private:
+
+    float target_heading_cd; // target heading in centidegrees (0-36000)
+    bool target_heading_set; // true if target heading has been set
+    uint32_t mode_start_time_ms; // time when mode was activated
+    
+    // Hardcoded target heading (can be made configurable later)
+    static constexpr float HARDCODED_HEADING_DEG = 90.0f; // 90 degrees (East)
+    static constexpr float FORWARD_THROTTLE_PERCENT = 0.5f; // 50% throttle
+    static constexpr float FORWARD_PITCH_DEG = 5.0f; // 5 degrees forward pitch for movement
+};
