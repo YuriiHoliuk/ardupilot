@@ -25,6 +25,7 @@ bool ModeAutoHeading::init(bool ignore_checks)
     target_heading_set = false;
     target_heading_cd = HARDCODED_HEADING_DEG * 100.0f; // convert to centidegrees
     mode_start_time_ms = AP_HAL::millis();
+    using_throttle_control = false; // start with pitch control
     
     // reset the throttle-to-pitch PID controller
     _throttle_to_pitch_pid.reset_I();
@@ -67,12 +68,14 @@ void ModeAutoHeading::run()
     float target_roll = 0.0f;
     float target_pitch = 0.0f;
     
-    // once we're close to target heading, start forward flight with throttle control
+    // once we're close to target heading, start forward flight with throttle/pitch control
     if (fabsf(heading_error_cd) < 2000.0f) { // within 20 degrees
         target_heading_set = true;
         
         // Get current throttle output from attitude controller
         float current_throttle = attitude_control->get_throttle_in();
+        
+        // Enhanced control logic: pitch control with throttle fallback for safety
         
         // Calculate throttle error (target is 50%)
         float throttle_error = TARGET_THROTTLE - current_throttle;
@@ -82,11 +85,31 @@ void ModeAutoHeading::run()
         // If throttle < 50%, we need more positive pitch (nose up) to increase lift
         float pitch_adjustment_deg = _throttle_to_pitch_pid.update_all(throttle_error, 0.0f, G_Dt);
         
-        // Constrain pitch adjustment to reasonable limits
-        pitch_adjustment_deg = constrain_float(pitch_adjustment_deg, -15.0f, 15.0f);
+        // Calculate desired pitch with PID adjustment
+        float desired_pitch_deg = -FORWARD_PITCH_DEG + pitch_adjustment_deg; // negative for forward
         
-        // Start with baseline forward pitch and add PID adjustment
-        target_pitch = (-FORWARD_PITCH_DEG + pitch_adjustment_deg) * 100.0f; // negative for forward, convert to centidegrees
+        // Enhanced control logic with pitch limits and throttle fallback
+        if (desired_pitch_deg < MIN_PITCH_DEG) {
+            // Desired pitch is too nose-down (dangerous), switch to throttle control
+            using_throttle_control = true;
+            target_pitch = MIN_PITCH_DEG * 100.0f; // clamp to minimum safe pitch
+            
+            // If we can't achieve target throttle with minimum pitch, try increasing throttle
+            if (current_throttle < TARGET_THROTTLE && current_throttle < MAX_THROTTLE) {
+                // We need more throttle to maintain altitude at minimum pitch
+                // This will be handled by the altitude controller automatically
+                // The altitude controller will increase throttle as needed
+            } else if (current_throttle >= MAX_THROTTLE) {
+                // We've hit maximum throttle and still can't maintain altitude
+                // Allow pitch to go more negative as last resort for altitude control
+                using_throttle_control = false;
+                target_pitch = desired_pitch_deg * 100.0f; // allow steeper nose-down
+            }
+        } else {
+            // Normal pitch control - desired pitch is within safe limits
+            using_throttle_control = false;
+            target_pitch = constrain_float(desired_pitch_deg * 100.0f, MIN_PITCH_DEG * 100.0f, 15.0f * 100.0f);
+        }
     }
 
     // get pilot desired climb rate (allow altitude adjustment)
@@ -106,8 +129,9 @@ void ModeAutoHeading::run()
         target_roll = 0.0f;
         target_pitch = 0.0f;
         target_yaw_rate = 0.0f;
-        // Reset PID when motors stopped
+        // Reset PID and control state when motors stopped
         _throttle_to_pitch_pid.reset_I();
+        using_throttle_control = false;
         break;
 
     case AltHoldModeState::Landed_Ground_Idle:
@@ -120,8 +144,9 @@ void ModeAutoHeading::run()
         target_roll = 0.0f;
         target_pitch = 0.0f;
         target_yaw_rate = 0.0f;
-        // Reset PID when landed
+        // Reset PID and control state when landed
         _throttle_to_pitch_pid.reset_I();
+        using_throttle_control = false;
         break;
 
     case AltHoldModeState::Takeoff:

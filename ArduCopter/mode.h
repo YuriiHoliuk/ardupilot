@@ -2095,11 +2095,14 @@ private:
     static constexpr float HARDCODED_HEADING_DEG = 90.0f; // East direction
     static constexpr float FORWARD_PITCH_DEG = 5.0f;     // Initial forward pitch
     static constexpr float TARGET_THROTTLE = 0.5f;       // Target 50% throttle
+    static constexpr float MIN_PITCH_DEG = -15.0f;       // Minimum pitch angle (nose down limit)
+    static constexpr float MAX_THROTTLE = 0.9f;          // Maximum throttle when at minimum pitch
     
     // State variables
     bool target_heading_set;
     float target_heading_cd;
     uint32_t mode_start_time_ms;
+    bool using_throttle_control;  // true when we're controlling throttle instead of pitch (at min pitch limit)
     
     // Throttle-to-pitch PID controller (using proven balance bot gains, inverted for our use case)
     // This adjusts pitch to maintain target throttle, based on AR_AttitudeControl's _pitch_to_throttle_pid
