@@ -2080,8 +2080,7 @@ protected:
     const char *name4() const override { return "FSCP"; }
 
 private:
-    // Configuration constants for POC
-    static constexpr float FAILSAFE_COMPASS_PITCH_DEG = 5.0f;      // 5 degree forward pitch  
+    // Configuration constants
     static constexpr float FAILSAFE_COMPASS_ALT_TOLERANCE_CM = 200.0f; // 2m altitude tolerance
 
     // Target heading in degrees

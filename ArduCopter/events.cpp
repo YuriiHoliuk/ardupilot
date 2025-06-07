@@ -41,9 +41,8 @@ void Copter::failsafe_radio_on_event()
             break;
 #if MODE_FAILSAFE_COMPASS_ENABLED
         case FS_THR_ENABLED_COMPASS:
-            // For POC, directly switch to failsafe compass mode
-            set_mode(Mode::Number::FAILSAFE_COMPASS, ModeReason::RADIO_FAILSAFE);
-            return;  // Exit early as we've handled the mode change
+            desired_action = FailsafeAction::FAILSAFE_COMPASS;
+            break;
 #endif
         default:
             desired_action = FailsafeAction::LAND;
@@ -510,6 +509,19 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
             break;
         case FailsafeAction::BRAKE_LAND:
             set_mode_brake_or_land_with_pause(reason);
+            break;
+        case FailsafeAction::FAILSAFE_COMPASS:
+#if MODE_FAILSAFE_COMPASS_ENABLED
+            if (set_mode(Mode::Number::FAILSAFE_COMPASS, reason)) {
+                AP_Notify::events.failsafe_mode_change = 1;
+            } else {
+                gcs().send_text(MAV_SEVERITY_WARNING, "Failsafe Compass unavailable, trying Land");
+                set_mode_land_with_pause(reason);
+            }
+#else
+            // Fallback if compass failsafe is disabled
+            set_mode_land_with_pause(reason);
+#endif
             break;
     }
 

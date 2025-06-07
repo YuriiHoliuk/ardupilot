@@ -78,7 +78,7 @@ void ModeFailsafeCompass::run()
     // Send the commanded climb rate to the position controller
     pos_control->set_pos_target_z_from_climb_rate_cm(target_climb_rate);
 
-    // Open-loop control: Calculate fixed pitch based on target heading
+    // Open-loop control: Calculate pitch based on target heading
     // Pitch forward in the direction of the target heading
     float target_pitch_cd = g2.fs_compass_pitch * 100;  // Use configurable pitch angle
     float target_roll_cd = 0;  // No roll for straight flight
