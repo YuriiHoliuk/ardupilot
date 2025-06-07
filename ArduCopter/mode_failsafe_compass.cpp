@@ -5,6 +5,13 @@
 // failsafe_compass_init - initialise failsafe compass mode
 bool ModeFailsafeCompass::init(bool ignore_checks)
 {
+    // Validate parameters
+    if (g2.fs_compass_pitch < 1 || g2.fs_compass_pitch > 90) {
+        gcs().send_text(MAV_SEVERITY_WARNING, "FailsafeCompass: Invalid pitch angle %d", (int)g2.fs_compass_pitch);
+
+        return false;
+    }
+
     // initialize vertical maximum speeds and acceleration
     pos_control->set_max_speed_accel_U_cm(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
     pos_control->set_correction_speed_accel_U_cmss(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
@@ -14,8 +21,26 @@ bool ModeFailsafeCompass::init(bool ignore_checks)
         pos_control->init_U_controller();
     }
 
-    // set initial target heading to configured failsafe heading
-    _target_heading_deg = g2.fs_compass_heading;
+    // set initial target heading based on configured source
+    if (g2.fs_compass_hdg_src == 1) {
+        // Try to use home direction
+        Vector2f home_offset;
+
+        if (ahrs.get_relative_position_NE_home(home_offset)) {
+            // Calculate bearing to home from relative position
+            float home_bearing_rad = atan2f(-home_offset.y, -home_offset.x);
+            _target_heading_deg = wrap_360(degrees(home_bearing_rad));
+            gcs().send_text(MAV_SEVERITY_INFO, "FailsafeCompass: Using home direction %.0f deg", _target_heading_deg);
+        } else {
+            // Fallback to configured heading if home direction unavailable
+            _target_heading_deg = g2.fs_compass_heading;
+            gcs().send_text(MAV_SEVERITY_WARNING, "FailsafeCompass: Home unavailable, using fixed heading %.0f deg", _target_heading_deg);
+        }
+    } else {
+        // Use configured fixed heading
+        _target_heading_deg = g2.fs_compass_heading;
+        gcs().send_text(MAV_SEVERITY_INFO, "FailsafeCompass: Using fixed heading %.0f deg", _target_heading_deg);
+    }
 
     return true;
 }
@@ -55,7 +80,7 @@ void ModeFailsafeCompass::run()
 
     // Open-loop control: Calculate fixed pitch based on target heading
     // Pitch forward in the direction of the target heading
-    float target_pitch_cd = FAILSAFE_COMPASS_PITCH_DEG * 100;  // Fixed 10 degrees forward pitch
+    float target_pitch_cd = g2.fs_compass_pitch * 100;  // Use configurable pitch angle
     float target_roll_cd = 0;  // No roll for straight flight
     
     // Calculate target yaw from target heading

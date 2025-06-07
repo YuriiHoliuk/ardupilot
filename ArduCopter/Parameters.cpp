@@ -1215,6 +1215,22 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @Increment: 1
     // @User: Standard
     AP_GROUPINFO("FS_COMPASS_HDG", 11, ParametersG2, fs_compass_heading, 0),
+    
+    // @Param: FS_COMPASS_PITCH
+    // @DisplayName: Failsafe Compass Pitch Angle
+    // @Description: Forward pitch angle in degrees for failsafe compass mode. This controls how aggressively the aircraft flies forward
+    // @Units: deg
+    // @Range: 5 20
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_PITCH", 12, ParametersG2, fs_compass_pitch, 5),
+    
+    // @Param: FS_COMPASS_HDG_SRC
+    // @DisplayName: Failsafe Compass Heading Source
+    // @Description: Source for failsafe compass heading. 0=Use FS_COMPASS_HDG parameter value, 1=Use home direction if available
+    // @Values: 0:Fixed Heading,1:Home Direction
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_HDG_SRC", 13, ParametersG2, fs_compass_hdg_src, 0),
 #endif
 
     // ID 62 is reserved for the AP_SUBGROUPEXTENSION
