@@ -49,7 +49,6 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 #### Tasks:
 
 1. **Expand parameter system**
-   - [ ] Add `FS_COMPASS_MODE` parameter (enable/disable)
    - [ ] Add `FS_COMPASS_PITCH` parameter (5-20°, default 5°)
    - [ ] Add `FS_COMPASS_HDG_SRC` parameter (0=fixed heading, 1=home direction)
 

@@ -666,8 +666,10 @@ public:
     AP_Float                surftrak_tc;
 
 #if MODE_FAILSAFE_COMPASS_ENABLED
-    // Failsafe compass heading parameter
+    // Failsafe compass parameters
     AP_Int16                fs_compass_heading;     // Target heading in degrees (0-359)
+    AP_Int8                 fs_compass_pitch;       // Forward pitch angle in degrees (5-20)
+    AP_Int8                 fs_compass_hdg_src;     // Heading source: 0=fixed, 1=home
 #endif
 
     // ramp time of throttle during take-off
