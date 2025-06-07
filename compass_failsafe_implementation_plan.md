@@ -90,16 +90,6 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
    - [ ] Implement throttle target maintenance with pitch adjustment
    - [ ] Integrate PID controller for pitch adjustment based on throttle feedback
 
-3. **Timeout and auto-land**
-   - [ ] Add `FS_COMPASS_TIMEOUT` parameter
-   - [ ] Implement flight time tracking
-   - [ ] Add automatic land mode transition on timeout
-
-4. **Battery monitoring integration**
-   - [ ] Integrate with existing battery failsafe system
-   - [ ] Implement emergency land on critical battery
-   - [ ] Add proper priority handling between different failsafe conditions
-
 5. **Comprehensive testing**
    - [ ] Test RC channel heading adjustment
    - [ ] Validate timeout and auto-land functionality

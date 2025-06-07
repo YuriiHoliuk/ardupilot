@@ -1231,6 +1231,47 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @Values: 0:Fixed Heading,1:Home Direction
     // @User: Standard
     AP_GROUPINFO("FS_COMPASS_HDG_SRC", 13, ParametersG2, fs_compass_hdg_src, 0),
+    
+    // @Param: FS_COMPASS_HDG_CH
+    // @DisplayName: Failsafe Compass Heading RC Channel
+    // @Description: RC channel for heading adjustment. When set to a valid channel (1-16), the channel value will be used to adjust the failsafe heading before radio failsafe triggers. 0=disabled
+    // @Range: 0 16
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_HDG_CH", 14, ParametersG2, fs_compass_hdg_ch, 0),
+    
+    // @Param: FS_COMPASS_THR_CTRL_ENABLED
+    // @DisplayName: Failsafe Compass Throttle Control
+    // @Description: Enable advanced throttle control with automatic pitch adjustment to maintain target throttle
+    // @Values: 0:Disabled,1:Enabled
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_THR_CTRL_ENABLED", 15, ParametersG2, fs_compass_thr_ctrl_enabled, 0),
+    
+    // @Param: FS_COMPASS_TARGET_THR
+    // @DisplayName: Failsafe Compass Target Throttle
+    // @Description: Target throttle percentage when throttle control is enabled. The mode will adjust pitch to maintain this throttle level
+    // @Units: %
+    // @Range: 20 80
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_TARGET_THR", 16, ParametersG2, fs_compass_target_thr, 50),
+    
+    // @Param: FS_COMPASS_PITCH_MIN
+    // @DisplayName: Failsafe Compass Minimum Pitch
+    // @Description: Minimum pitch angle when using throttle control. The mode will not pitch below this angle
+    // @Units: deg
+    // @Range: 3 15
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_PITCH_MIN", 17, ParametersG2, fs_compass_pitch_min, 3),
+    
+    // @Param: FS_COMPASS_PITCH_MAX
+    // @DisplayName: Failsafe Compass Maximum Pitch
+    // @Description: Maximum pitch angle when using throttle control. The mode will not pitch above this angle
+    // @Units: deg
+    // @Range: 10 30
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_PITCH_MAX", 18, ParametersG2, fs_compass_pitch_max, 20),
 #endif
 
     // ID 62 is reserved for the AP_SUBGROUPEXTENSION

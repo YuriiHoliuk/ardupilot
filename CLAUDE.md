@@ -13,6 +13,7 @@ ArduPilot uses the Waf build system. All build commands should be run from the r
 - `./waf distclean`: Clean all builds and configuration
 
 ### Testing
+- Always run ./waf commands in Docker
 - Run `docker run --rm -v "$(pwd):/ardupilot" -u "$(id -u):$(id -g)" ardupilot:latest bash -c './waf distclean && ./waf configure --board MatekH743 && ./waf copter'` to validate if current code builds. Or if you need to check it.
 - Run `./waf copter` to build the copter vehicle.
 - `./waf check`: Build all programs and run relevant tests

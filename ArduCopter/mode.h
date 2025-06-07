@@ -2065,8 +2065,9 @@ private:
 class ModeFailsafeCompass : public Mode {
 
 public:
-    // inherit constructor
-    using Mode::Mode;
+    // Constructor
+    ModeFailsafeCompass();
+    
     Number mode_number() const override { return Number::FAILSAFE_COMPASS; }
 
     bool init(bool ignore_checks) override;
@@ -2093,8 +2094,15 @@ protected:
 private:
     // Configuration constants
     static constexpr float FAILSAFE_COMPASS_ALT_TOLERANCE_CM = 200.0f; // 2m altitude tolerance
+    static constexpr float FAILSAFE_COMPASS_THR_TOLERANCE = 0.05f; // 5% throttle tolerance
 
     // Target heading in degrees
     float _target_heading_deg;
+    
+    // Current pitch angle for throttle control
+    float _current_pitch_deg;
+    
+    // PID controller for pitch adjustment based on throttle
+    AC_PID _pitch_controller;
 };
 #endif

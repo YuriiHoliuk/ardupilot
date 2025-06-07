@@ -672,6 +672,13 @@ public:
     AP_Int16                fs_compass_heading;     // Target heading in degrees (0-359)
     AP_Int8                 fs_compass_pitch;       // Forward pitch angle in degrees (5-20)
     AP_Int8                 fs_compass_hdg_src;     // Heading source: 0=fixed, 1=home
+    
+    // V2 parameters
+    AP_Int8                 fs_compass_hdg_ch;      // RC channel for heading adjustment (0=disabled)
+    AP_Int8                 fs_compass_thr_ctrl_enabled; // Enable/disable advanced throttle control
+    AP_Float                fs_compass_target_thr;  // Target throttle percentage
+    AP_Int8                 fs_compass_pitch_min;   // Minimum pitch angle
+    AP_Int8                 fs_compass_pitch_max;   // Maximum pitch angle
 #endif
 
     // ramp time of throttle during take-off

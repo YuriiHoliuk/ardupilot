@@ -1,7 +1,7 @@
 # Failsafe Compass Mode - Code Changes Documentation
 
 ## Overview
-This document details all code changes made to implement the Failsafe Compass mode MVP in ArduCopter.
+This document details all code changes made to implement the Failsafe Compass mode MVP and V2 enhanced features in ArduCopter.
 
 ## Files Modified/Added
 
@@ -104,7 +104,40 @@ This document details all code changes made to implement the Failsafe Compass mo
 - **GCS Status Reporting**: Provides feedback on mode activation and heading source used
 - **Proper Failsafe Action Integration**: Uses ArduCopter's FailsafeAction framework instead of direct mode switching
 
+## V2 Features Added
+- **RC Channel Heading Adjustment**: FS_COMPASS_HDG_CH parameter allows heading to be adjusted via RC channel before failsafe
+- **Advanced Throttle Control**: FS_COMPASS_THR_CTRL_ENABLED enables automatic pitch adjustment to maintain target throttle
+- **Dynamic Pitch Range**: FS_COMPASS_PITCH_MIN/MAX parameters define the pitch adjustment range
+- **PID Controller Integration**: Integrated AC_PID controller for smooth pitch adjustments based on throttle feedback
+
+## V2 Parameter Summary
+- `FS_COMPASS_HDG_CH`: RC channel for heading adjustment (0=disabled, 1-16 for channel selection)
+- `FS_COMPASS_THR_CTRL_ENABLED`: Enable/disable advanced throttle control (0=disabled, 1=enabled)
+- `FS_COMPASS_TARGET_THR`: Target throttle percentage (20-80%, default 50%)
+- `FS_COMPASS_PITCH_MIN`: Minimum pitch angle (3-15°, default 3°)
+- `FS_COMPASS_PITCH_MAX`: Maximum pitch angle (10-30°, default 20°)
+
+## V2 Implementation Details
+1. **RC Heading Control**: 
+   - Maps RC channel input (-100% to 100%) to heading (0° to 360°)
+   - Uses last known heading value when failsafe triggers
+   - Falls back to fixed heading if RC channel is invalid
+
+2. **Throttle Control System**:
+   - Monitors current throttle output
+   - Compares with target throttle (±5% tolerance)
+   - Uses PID controller to calculate pitch adjustments
+   - Constrains pitch within min/max limits
+   - Resets integrator when within tolerance to prevent windup
+
+3. **PID Controller Configuration**:
+   - P=1.0: 1% throttle error = 1° pitch change
+   - I=0.1: Slow integration for stability
+   - D=0: No derivative term for simplicity
+   - I_max=5.0: Limits integral windup to ±5°
+
 ## Testing Status
 - Code compiles successfully for MatekH743 board
 - MVP implementation complete
+- V2 enhanced features implemented
 - Ready for SITL and real-world testing for validation
