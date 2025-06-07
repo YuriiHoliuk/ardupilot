@@ -1241,6 +1241,22 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @Increment: 1
     // @User: Standard
     AP_GROUPINFO("FS_COMPASS_HDG", 11, ParametersG2, fs_compass_heading, 0),
+
+    // @Param: FS_COMPASS_PITCH
+    // @DisplayName: Failsafe Compass Pitch
+    // @Description: Pitch angle in degrees for failsafe compass mode. Negative values = forward flight, positive values = backward flight
+    // @Units: deg
+    // @Range: -45 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_PITCH", 12, ParametersG2, fs_compass_pitch, -5.0),
+
+    // @Param: FS_COMPASS_HDG_CH
+    // @DisplayName: Failsafe Compass Heading RC Channel
+    // @Description: RC channel for adjusting target heading during flight. When set to 0, this feature is disabled. When enabled, the RC channel input is mapped to 0-360 degrees (-100% = 0°, 0% = 180°, 100% = 360°)
+    // @Values: 0:Disabled,5:CH5,6:CH6,7:CH7,8:CH8,9:CH9,10:CH10,11:CH11,12:CH12,13:CH13,14:CH14,15:CH15,16:CH16
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_HDG_CH", 13, ParametersG2, fs_compass_hdg_ch, 0),
 #endif
 
     // ID 62 is reserved for the AP_SUBGROUPEXTENSION

@@ -2080,9 +2080,6 @@ protected:
     const char *name4() const override { return "FSCP"; }
 
 private:
-    // Configuration constants for POC
-    static constexpr float FAILSAFE_COMPASS_PITCH_DEG = 5.0f;      // 5 degree forward pitch  
-
     // Target heading in degrees
     float _target_heading_deg;
 };
