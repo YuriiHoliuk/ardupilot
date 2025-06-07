@@ -33,29 +33,14 @@ void ModeFailsafeCompass::run()
     // set motors to full range
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
-    // Get target altitude from RTL altitude parameter
-    float target_alt_cm = g.rtl_altitude * 100.0f;
-    
-    // Get current altitude (cm above home)
-    float current_alt_cm = pos_control->get_pos_target_z_cm();
-    
-    // Calculate climb rate based on altitude difference
-    float alt_diff_cm = target_alt_cm - current_alt_cm;
     float target_climb_rate = 0.0f;
     
-    if (alt_diff_cm > FAILSAFE_COMPASS_ALT_TOLERANCE_CM) {
-        // Need to climb
-        target_climb_rate = g.pilot_speed_up;
-    } else if (alt_diff_cm < -FAILSAFE_COMPASS_ALT_TOLERANCE_CM) {
-        // Do nothing, altitude should be >= target_alt_cm
-    }
-    
-    // Send the commanded climb rate to the position controller
+    // Send the commanded climb rate to the position controller (We always want to stay at the same altitude)
     pos_control->set_pos_target_z_from_climb_rate_cm(target_climb_rate);
 
     // Open-loop control: Calculate fixed pitch based on target heading
     // Pitch forward in the direction of the target heading
-    float target_pitch_cd = FAILSAFE_COMPASS_PITCH_DEG * 100;  // Fixed 10 degrees forward pitch
+    float target_pitch_cd = FAILSAFE_COMPASS_PITCH_DEG * 100;  // Fixed 5 degrees forward pitch
     float target_roll_cd = 0;  // No roll for straight flight
     
     // Calculate target yaw from target heading

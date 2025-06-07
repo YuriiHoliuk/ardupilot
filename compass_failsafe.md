@@ -2,15 +2,15 @@
 
 ## Overview
 
-Failsafe_Compass is a minimalistic failsafe mode for ArduCopter that enables the aircraft to fly in a predetermined direction using only compass and IMU data, without requiring GPS or other positioning systems. This mode activates during radio failsafe events to help the aircraft escape from its current location and potentially return toward the launch area.
+Failsafe_Compass is a minimalistic failsafe mode for ArduCopter that enables the aircraft to fly in a predetermined direction using only IMU data (gyroscope and accelerometer), without requiring GPS, compass, or other positioning systems. This mode activates during radio failsafe events to help the aircraft escape from its current location.
 
 ## Core Concept
 
 When radio communication is lost, the aircraft will:
 
 1. Turn to a preset heading
-2. Climb to a safe altitude
-3. Fly forward using pitch control
+2. Maintain current altitude
+3. Fly forward using configurable pitch control
 4. Continue until pilot regains control
 
 ## Implementation Phases
@@ -22,17 +22,17 @@ When radio communication is lost, the aircraft will:
 **Features**:
 
 - Single parameter: `FS_COMPASS_HDG` (0-359 degrees)
-- Fixed pitch angle: 5 degrees
-- Use existing RTL altitude parameter for climb target
+- Configurable pitch angle parameter: `FS_COMPASS_PITCH` (default 5 degrees)
+- Maintain current altitude - no altitude changes
 - No adjustable parameters during flight
 
 **Behavior**:
 
 ```
 On Radio Failsafe:
-1. Climb to FS_ALT_MIN (existing param)
+1. Maintain current altitude
 2. Turn to FS_COMPASS_HDG
-3. Apply 5° forward pitch
+3. Apply FS_COMPASS_PITCH forward pitch
 4. Continue until manual recovery
 ```
 
@@ -44,27 +44,20 @@ On Radio Failsafe:
 
 - `FS_COMPASS_HDG`: Target heading (0-359°)
 - `FS_COMPASS_PITCH`: Forward pitch angle (5-20°, default 5°)
-- `FS_COMPASS_HDG_SRC`:
-    - 0 = Use FS_COMPASS_HDG value
-    - 1 = Use home direction if available (investigate feasibility)
 
 **Features**:
 
 - Configurable pitch angle
-- Option to use home direction (if compass heading to home is available without GPS)
-- Reuse existing failsafe altitude parameters
+- Maintain current altitude - no altitude control needed
 
 **Behavior**:
 
 ```
-On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected. Same as POC):
-1. Check heading source:
-   - If HDG_SRC=1 and home direction available: use it
-   - Otherwise: use FS_COMPASS_HDG
-2. Climb to failsafe altitude
-3. Turn to target heading
-4. Apply FS_COMPASS_PITCH forward pitch
-5. Continue until manual recovery
+On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected):
+1. Maintain current altitude
+2. Turn to FS_COMPASS_HDG heading
+3. Apply FS_COMPASS_PITCH forward pitch
+4. Continue until manual recovery
 ```
 
 ### V2 (Enhanced Version)
@@ -74,28 +67,27 @@ On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected. Same as POC):
 **Additional Parameters**:
 
 - `FS_COMPASS_HDG_CH`: RC channel for heading adjustment (0=disabled)
-- `FS_COMPASS_THR_CTRL_ENABLED`: Enables or disables advanced throttle control
-- `FS_COMPASS_TARGET_THR`: Target throttle
-- `FS_COMPASS_PITCH_MIN`: Target throttle
-- `FS_COMPASS_PITCH_MAX`: Target throttle
+- `FS_COMPASS_OSD_ENABLE`: Enable OSD display of target heading (0=disabled, 1=enabled)
+- `FS_COMPASS_OSD_ITEM`: OSD item slot for heading display (configurable without ground station modification)
 
 **Features**:
 
-- RC-adjustable heading (when link available before failsafe).
-- Throttle target for heavy/light loads. Allows to maintain throttle if possible and adjust pitch manually.
+- RC-adjustable heading (when link available before failsafe)
+- Real-time OSD display of configured target heading
+- Live heading updates visible during flight as pilot adjusts RC channel
 
 **Enhanced Behavior**:
 
 ```
 Before failsafe:
 - Monitor FS_COMPASS_HDG_CH for heading updates
+- Display current target heading on OSD (if enabled)
+- Update OSD display in real-time as pilot adjusts heading
 
 On Radio Failsafe:
-1. Use last known heading from RC channel (if configured)
-2. Climb to altitude
-3. Maintain heading, pitch, and throttle.
-	1. We have to maintain the throttle here, but it will be simpler to adjust pitch, allow the Z controller to maintain throttle, and adjust pitch if needed.
-	   Details: At the beginning, select a pitch between the min and max params. Monitor throttle if it's +- 5% from target - continue as is. If not, start increasing or decreasing pitch correspondingly. We probably need PID or other controller here.
+1. Use last known heading from RC channel (if configured), otherwise use FS_COMPASS_HDG
+2. Maintain current altitude
+3. Apply configured pitch angle and maintain heading
 4. Continue until manual recovery
 ```
 
@@ -103,15 +95,16 @@ On Radio Failsafe:
 
 ### Altitude Control
 
-- Leverage existing Z-axis controller
+- Maintain current altitude when failsafe activates
 - Use barometer for altitude hold
-- Reuse RTL or failsafe altitude parameters
+- No climbing or altitude changes to avoid obstacles
 
 ### Heading Control
 
-- Use compass data with IMU fusion
+- Use IMU data only (gyroscope and accelerometer)
+- AHRS provides heading estimate without compass dependency
 - Implement turn rate limiting for smooth transitions
-- Consider magnetic declination
+- Note: Heading may drift over time without compass reference
 
 ### Pitch Control
 
@@ -136,7 +129,7 @@ On Radio Failsafe:
 
 ### Mitigations
 
-- Climb to safe altitude first
+- Maintain current altitude to avoid unnecessary movement
 - Conservative pitch angles
 - Battery monitoring
 - Pilot can override immediately upon RC recovery
@@ -182,6 +175,9 @@ On Radio Failsafe:
 ### V2 Testing
 
 1. RC channel heading adjustment
-2. Timeout and auto-land
-3. Battery failsafe integration
-4. Extended flight duration
+2. OSD heading display functionality
+3. Real-time heading updates on OSD
+4. OSD configuration without ground station modification
+5. Timeout and auto-land
+6. Battery failsafe integration
+7. Extended flight duration

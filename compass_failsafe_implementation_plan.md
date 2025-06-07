@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This document outlines the implementation plan for the Failsafe_Compass mode in ArduCopter. This mode enables the aircraft to fly in a predetermined direction using only compass and IMU data during radio failsafe events.
+This document outlines the implementation plan for the Failsafe_Compass mode in ArduCopter. This mode enables the aircraft to fly in a predetermined direction using only IMU data (gyroscope and accelerometer) during radio failsafe events.
 
 ## Implementation Phases
 
@@ -27,9 +27,9 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
    - [x] Add parameter definitions and validation
 
 4. **Implement core flight behavior**
-   - [x] Altitude control: Climb to existing `FS_ALT_MIN` parameter
-   - [x] Heading control: Turn to `FS_COMPASS_HDG` using compass data
-   - [x] Pitch control: Apply fixed 5° forward pitch
+   - [x] Altitude control: Maintain current altitude
+   - [x] Heading control: Turn to `FS_COMPASS_HDG` using IMU/AHRS data
+   - [x] Pitch control: Apply configurable forward pitch (FS_COMPASS_PITCH parameter)
    - [x] Use existing attitude control systems
 
 5. **Integrate with failsafe system**
@@ -50,17 +50,16 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 
 1. **Expand parameter system**
    - [ ] Add `FS_COMPASS_MODE` parameter (enable/disable)
-   - [ ] Add `FS_COMPASS_PITCH` parameter (5-20°, default 5°)
-   - [ ] Add `FS_COMPASS_HDG_SRC` parameter (0=fixed heading, 1=home direction)
+   - [x] Add `FS_COMPASS_PITCH` parameter (5-20°, default 5°)
 
 2. **Implement configurable pitch control**
-   - [ ] Replace fixed 5° pitch with configurable `FS_COMPASS_PITCH`
+   - [x] Replace fixed pitch with configurable `FS_COMPASS_PITCH`
    - [ ] Add parameter validation and range checking
 
-3. **Investigate and implement home direction option**
-   - [ ] Research how to calculate heading to home without GPS
-   - [ ] Implement home direction calculation using compass and stored home position
-   - [ ] Add logic to switch between fixed heading and home direction
+3. **Enhanced parameter validation**
+   - [ ] Add comprehensive parameter range checking
+   - [ ] Implement parameter validation on mode entry
+   - [ ] Add parameter documentation and help text
 
 4. **Enhanced safety features**
    - [ ] Add parameter validation on mode entry
@@ -69,8 +68,8 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 
 5. **Extended testing**
    - [ ] Test with various pitch angles
-   - [ ] Validate home direction functionality (if feasible)
    - [ ] Test parameter validation
+   - [ ] Validate heading accuracy over time
 
 ### Phase 3: V2 (Enhanced Version)
 
@@ -83,26 +82,34 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
    - [ ] Implement pre-failsafe heading monitoring from RC channel
    - [ ] Store last known heading before failsafe
 
-2. **Advanced throttle control**
-   - [ ] Add `FS_COMPASS_THR_CTRL_ENABLED` parameter
-   - [ ] Add `FS_COMPASS_TARGET_THR` parameter
-   - [ ] Add `FS_COMPASS_PITCH_MIN` parameter
-   - [ ] Add `FS_COMPASS_PITCH_MAX` parameter
-   - [ ] Implement throttle target maintenance with pitch adjustment
-   - [ ] Integrate PID controller for pitch adjustment based on throttle feedback
+2. **OSD heading display**
+   - [ ] Add `FS_COMPASS_OSD_ENABLE` parameter to enable/disable OSD display
+   - [ ] Add `FS_COMPASS_OSD_ITEM` parameter for OSD item slot configuration
+   - [ ] Implement real-time heading display on OSD
+   - [ ] Update OSD display when pilot adjusts heading via RC channel
+   - [ ] Ensure OSD item can be configured without modifying Mission Planner/QGroundControl
+   - [ ] Add heading value to OSD backend data stream
 
-3. **Timeout and auto-land**
+3. **Simplified pitch control**
+   - [x] Use single configurable pitch parameter `FS_COMPASS_PITCH`
+   - [x] No throttle control - let altitude controller handle throttle
+   - [x] No complex pitch adjustment logic needed
+
+4. **Timeout and auto-land**
    - [ ] Add `FS_COMPASS_TIMEOUT` parameter
    - [ ] Implement flight time tracking
    - [ ] Add automatic land mode transition on timeout
 
-4. **Battery monitoring integration**
+5. **Battery monitoring integration**
    - [ ] Integrate with existing battery failsafe system
    - [ ] Implement emergency land on critical battery
    - [ ] Add proper priority handling between different failsafe conditions
 
-5. **Comprehensive testing**
+6. **Comprehensive testing**
    - [ ] Test RC channel heading adjustment
+   - [ ] Test OSD heading display functionality
+   - [ ] Validate real-time OSD updates during flight
+   - [ ] Test OSD configuration without ground station modification
    - [ ] Validate timeout and auto-land functionality
    - [ ] Test battery failsafe integration
    - [ ] Extended flight duration testing
@@ -138,8 +145,8 @@ ArduCopter/
 
 4. **Attitude Control Integration**
    - Use existing `AC_AttitudeControl` for heading and pitch
-   - Leverage existing altitude control for climb and hold
-   - Integrate with compass and AHRS systems
+   - Leverage existing altitude control for altitude hold (no climb)
+   - Integrate with IMU and AHRS systems (no compass dependency)
 
 ### Testing Strategy
 
@@ -149,7 +156,7 @@ ArduCopter/
    - Failsafe scenario simulation
 
 2. **Hardware Testing**
-   - Compass accuracy verification
+   - IMU/AHRS heading accuracy verification
    - Real-world failsafe scenarios
    - Wind resistance testing
 
@@ -185,9 +192,9 @@ ArduCopter/
 ## Risks and Mitigations
 
 ### Technical Risks
-- **Compass accuracy**: Mitigate with proper calibration requirements
+- **IMU heading drift**: Accept limitation without compass, document in user guide
 - **Wind drift**: Accept limitation, document in user guide
-- **Altitude accuracy**: Use barometer, accept inherent limitations
+- **Altitude hold accuracy**: Use barometer, accept inherent limitations
 
 ### Safety Risks
 - **No obstacle avoidance**: Mitigate with high altitude requirement

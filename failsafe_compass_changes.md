@@ -54,17 +54,17 @@ This document details all code changes made to implement the Failsafe Compass mo
 
 ### Mode Behavior
 1. **Altitude Control**: 
-   - Climbs to RTL altitude parameter value
+   - Maintains current altitude when failsafe activates
    - Uses barometer-based altitude controller
-   - Maintains altitude once reached (±2m tolerance)
+   - No climbing or altitude changes
 
 2. **Heading Control**:
    - Turns to heading specified in `FS_COMPASS_HDG` parameter
-   - Uses compass data with AHRS fusion
+   - Uses IMU data with AHRS fusion (no compass dependency)
    - Maintains heading using yaw control
 
 3. **Forward Flight**:
-   - Open-loop control with fixed 10-degree pitch angle
+   - Open-loop control with configurable pitch angle (FS_COMPASS_PITCH parameter)
    - No velocity feedback required (GPS-free operation)
    - Simple pitch command in target heading direction
 
@@ -73,7 +73,8 @@ This document details all code changes made to implement the Failsafe Compass mo
 - Open-loop control - no velocity feedback needed
 - No position control - pure heading and pitch based flight
 - No obstacle avoidance or terrain following
-- Completely GPS-free operation
+- Completely GPS-free and compass-free operation
+- Uses IMU/AHRS for heading without compass dependency
 
 ## Build System
 - No changes needed to wscript - mode files are automatically included
@@ -82,6 +83,7 @@ This document details all code changes made to implement the Failsafe Compass mo
 
 ## Parameter Summary
 - `FS_COMPASS_HDG`: Target heading in degrees (0-359)
+- `FS_COMPASS_PITCH`: Forward pitch angle in degrees (configurable, default 5°)
 - `FS_THR_ENABLE = 8`: New option to activate compass failsafe mode
 
 ## Testing Status
