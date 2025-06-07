@@ -7,13 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ArduPilot uses the Waf build system. All build commands should be run from the root directory.
 
 ### Basic Build Commands
-- `./waf configure --board MatekH743`: Configure for a specific board we need to use
+- `./waf configure --board speedybeef4v3`: Configure for a specific board we need to use
 - `./waf copter`: Build the copter vehicle. We need only copter for now.
 - `./waf clean`: Clean current board build
 - `./waf distclean`: Clean all builds and configuration
 
 ### Testing
-- Run `docker run --rm -v "$(pwd):/ardupilot" -u "$(id -u):$(id -g)" ardupilot:latest bash -c './waf distclean && ./waf configure --board MatekH743 && ./waf copter'` to validate if current code builds. Or if you need to check it.
+- Run `docker run --rm -v "$(pwd):/ardupilot" -u "$(id -u):$(id -g)" ardupilot:latest bash -c './waf distclean && ./waf configure --board speedybeef4v3 && ./waf copter'` to validate if current code builds. Or if you need to check it.
 - Run `./waf copter` to build the copter vehicle.
 - `./waf check`: Build all programs and run relevant tests
 - `./waf check-all`: Build all programs and run all tests

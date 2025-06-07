@@ -2073,9 +2073,6 @@ public:
     // Generally should not allow arming in failsafe mode
     bool allows_arming(AP_Arming::Method method) const override { return false; }
     
-    // Interface for navigation info
-    float wp_distance_m() const override;
-    int32_t wp_bearing() const override;
     float crosstrack_error() const override { return 0.0f; }
 
 protected:

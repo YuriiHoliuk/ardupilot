@@ -6,12 +6,12 @@
 bool ModeFailsafeCompass::init(bool ignore_checks)
 {
     // initialize vertical maximum speeds and acceleration
-    pos_control->set_max_speed_accel_U_cm(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
-    pos_control->set_correction_speed_accel_U_cmss(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
+    pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
+    pos_control->set_correction_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
     // initialise altitude controller
-    if (!pos_control->is_active_U()) {
-        pos_control->init_U_controller();
+    if (!pos_control->is_active_z()) {
+        pos_control->init_z_controller();
     }
 
     // set initial target heading to configured failsafe heading
@@ -37,7 +37,7 @@ void ModeFailsafeCompass::run()
     float target_alt_cm = g.rtl_altitude * 100.0f;
     
     // Get current altitude (cm above home)
-    float current_alt_cm = pos_control->get_pos_target_U_cm();
+    float current_alt_cm = pos_control->get_pos_target_z_cm();
     
     // Calculate climb rate based on altitude difference
     float alt_diff_cm = target_alt_cm - current_alt_cm;
@@ -51,7 +51,7 @@ void ModeFailsafeCompass::run()
     }
     
     // Send the commanded climb rate to the position controller
-    pos_control->set_pos_target_U_from_climb_rate_cm(target_climb_rate);
+    pos_control->set_pos_target_z_from_climb_rate_cm(target_climb_rate);
 
     // Open-loop control: Calculate fixed pitch based on target heading
     // Pitch forward in the direction of the target heading
@@ -62,20 +62,10 @@ void ModeFailsafeCompass::run()
     float target_yaw_cd = _target_heading_deg * 100.0f;
     
     // Call attitude controller with fixed angles (open-loop)
-    attitude_control->input_euler_angle_roll_pitch_yaw_cd(target_roll_cd, target_pitch_cd, target_yaw_cd, true);
+    attitude_control->input_euler_angle_roll_pitch_yaw(target_roll_cd, target_pitch_cd, target_yaw_cd, true);
     
     // Update altitude controller
-    pos_control->update_U_controller();
-}
-
-float ModeFailsafeCompass::wp_distance_m() const
-{
-    return 0.0f;
-}
-
-int32_t ModeFailsafeCompass::wp_bearing() const
-{
-    return _target_heading_deg;
+    pos_control->update_z_controller();
 }
 
 #endif  // MODE_FAILSAFE_COMPASS_ENABLED
