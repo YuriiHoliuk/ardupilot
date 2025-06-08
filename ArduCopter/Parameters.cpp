@@ -1241,6 +1241,15 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @Increment: 1
     // @User: Standard
     AP_GROUPINFO("FS_COMPASS_HDG", 11, ParametersG2, fs_compass_heading, 0),
+
+    // @Param: FS_COMPASS_PITCH
+    // @DisplayName: Failsafe Compass Pitch Angle
+    // @Description: Pitch angle in degrees for forward flight in failsafe compass mode. Negative values pitch forward, positive values pitch backward. Controls the speed of travel.
+    // @Units: deg
+    // @Range: -45 45
+    // @Increment: 1
+    // @User: Standard
+    AP_GROUPINFO("FS_COMPASS_PITCH", 12, ParametersG2, fs_compass_pitch, -5),
 #endif
 
     // ID 62 is reserved for the AP_SUBGROUPEXTENSION
