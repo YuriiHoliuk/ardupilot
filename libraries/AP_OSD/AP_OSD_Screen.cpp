@@ -54,6 +54,10 @@
 #include <GCS_MAVLink/GCS.h>
 #include <AC_Fence/AC_Fence.h>
 
+#if APM_BUILD_TYPE(APM_BUILD_ArduCopter)
+#include "../../ArduCopter/config.h"
+#endif
+
 #if AP_OSD_EXTENDED_LNK_STATS
 // We need to this file to access the CRSF telemetry objects which contains the link stats data
 #include <AP_RCProtocol/AP_RCProtocol_CRSF.h>   
@@ -2332,6 +2336,22 @@ void AP_OSD_Screen::draw_eff(uint8_t x, uint8_t y)
 #if AP_BATTERY_ENABLED
 void AP_OSD_Screen::draw_climbeff(uint8_t x, uint8_t y)
 {
+#if MODE_FAILSAFE_COMPASS_ENABLED && APM_BUILD_TYPE(APM_BUILD_ArduCopter)
+    // Repurposed to show Failsafe Compass Heading
+    // This is a hack to display compass failsafe heading without adding new OSD item
+    ap_var_type type;
+    AP_Param::ParamToken token;
+    AP_Param* param = AP_Param::find_by_name("FS_COMPASS_HDG", &type, &token);
+    
+    if (param != nullptr && type == AP_PARAM_INT16) {
+        AP_Int16* fs_compass_heading = (AP_Int16*)param;
+        int16_t hdg_value = fs_compass_heading->get();
+        backend->write(x, y, false, "FSHDG:%3d%c", hdg_value, SYMBOL(SYM_DEGR));
+    } else {
+        backend->write(x, y, false, "FSHDG:---%c", SYMBOL(SYM_DEGR));
+    }
+#else
+    // Original climb efficiency code
     char unit_icon = u_icon(DISTANCE);
     Vector3f v;
     float vspd;
@@ -2358,6 +2378,7 @@ void AP_OSD_Screen::draw_climbeff(uint8_t x, uint8_t y)
     } else {
         backend->write(x, y, false,"%c%c---%c",SYMBOL(SYM_PTCHUP),SYMBOL(SYM_EFF),unit_icon);
     }
+#endif
 }
 #endif
 
