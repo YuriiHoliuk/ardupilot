@@ -193,6 +193,52 @@ void Copter::radio_passthrough_to_motors()
                                   channel_yaw->norm_input());
 }
 
+#if MODE_FAILSAFE_COMPASS_ENABLED
+/*
+  update failsafe compass heading from RC channel
+ */
+void Copter::update_fs_compass_heading_from_rc()
+{
+    // Check if RC channel is configured
+    // if (g2.fs_compass_hdg_ch <= 0 || g2.fs_compass_hdg_ch > RC_Channels::get_valid_channel_count()) {
+    //     return;
+    // }
+
+    // Get the RC channel
+    RC_Channel *ch = rc().channel(6 - 1);
+
+    if (ch == nullptr) {
+        return;
+    }
+
+    // Get the calibrated RC input range
+    uint16_t rc_min = ch->get_radio_min();
+    uint16_t rc_max = ch->get_radio_max();
+    uint16_t rc_raw = ch->get_radio_in();
+    
+    // Map RC input (rc_min to rc_max) to heading (0-360 degrees)
+    float range = rc_max - rc_min;
+
+    if (range <= 0) {
+        return; // Avoid division by zero
+    }
+    
+    // Clamp rc_raw to valid range to prevent negative values
+    uint16_t clamped_raw = constrain_int16(rc_raw, rc_min, rc_max);
+    
+    float normalized = (clamped_raw - rc_min) / range; // 0.0 to 1.0
+    float new_heading = normalized * 360.0f; // 0 to 360 degrees
+
+    if (new_heading >= 360.0f) {
+        new_heading = 359.0f; // Cap at 359 to avoid 360
+    }
+    
+    g2.fs_compass_heading.set_and_save(new_heading);  // This saves to EEPROM
+    // Replace with this one to avoid setting to EEPROM after testing
+    // g2.fs_compass_heading.set(new_heading);
+}
+#endif
+
 /*
   return the throttle input for mid-stick as a control-in value
  */

@@ -525,6 +525,11 @@ void Copter::rc_loop()
     // -----------------------------------------
     read_radio();
     rc().read_mode_switch();
+
+#if MODE_FAILSAFE_COMPASS_ENABLED
+    // Update failsafe compass heading from RC channel if configured
+    update_fs_compass_heading_from_rc();
+#endif
 }
 
 // throttle_loop - should be run at 50 hz

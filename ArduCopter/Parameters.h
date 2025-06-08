@@ -669,6 +669,7 @@ public:
     // Failsafe compass heading parameter
     AP_Int16                fs_compass_heading;     // Target heading in degrees (0-359)
     AP_Float                fs_compass_pitch;       // Pitch angle in degrees (-45 to +45, negative=forward)
+    // AP_Int16                fs_compass_hdg_ch;      // RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
 #endif
 
     // ramp time of throttle during take-off

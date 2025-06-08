@@ -946,6 +946,9 @@ private:
     void set_throttle_zero_flag(int16_t throttle_control);
     void radio_passthrough_to_motors();
     int16_t get_throttle_mid(void);
+#if MODE_FAILSAFE_COMPASS_ENABLED
+    void update_fs_compass_heading_from_rc();
+#endif
 
     // sensors.cpp
     void read_barometer(void);
