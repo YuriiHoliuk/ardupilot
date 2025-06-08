@@ -22,7 +22,7 @@ When radio communication is lost, the aircraft will:
 **Features**:
 
 - Single parameter: `FS_COMPASS_HDG` (0-359 degrees)
-- Configurable pitch angle parameter: `FS_COMPASS_PITCH` (default 5 degrees)
+- Configurable pitch angle parameter: `FS_COMPASS_PITCH` (range -45 to +45 degrees, default -5 degrees)
 - Maintain current altitude - no altitude changes
 - No adjustable parameters during flight
 
@@ -43,7 +43,7 @@ On Radio Failsafe:
 **New Parameters**:
 
 - `FS_COMPASS_HDG`: Target heading (0-359°)
-- `FS_COMPASS_PITCH`: Forward pitch angle (5-20°, default 5°)
+- `FS_COMPASS_PITCH`: Pitch angle (-45 to +45°, default -5°, negative = forward flight)
 
 **Features**:
 
@@ -66,26 +66,28 @@ On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected):
 
 **Additional Parameters**:
 
-- `FS_COMPASS_HDG_CH`: RC channel for heading adjustment (0=disabled)
+- `FS_COMPASS_HDG_CH`: RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
 - `FS_COMPASS_OSD_ENABLE`: Enable OSD display of target heading (0=disabled, 1=enabled)
 - `FS_COMPASS_OSD_ITEM`: OSD item slot for heading display (configurable without ground station modification)
 
 **Features**:
 
-- RC-adjustable heading (when link available before failsafe)
+- RC-adjustable heading during flight (continuously updates FS_COMPASS_HDG parameter)
 - Real-time OSD display of configured target heading
 - Live heading updates visible during flight as pilot adjusts RC channel
+- RC input mapping: -100% = 0°, 0% = 180°, +100% = 360°
 
 **Enhanced Behavior**:
 
 ```
-Before failsafe:
-- Monitor FS_COMPASS_HDG_CH for heading updates
+During normal flight (when FS_COMPASS_HDG_CH is configured):
+- Continuously monitor RC channel input
+- Map RC input to heading (0-360 degrees)
+- Update FS_COMPASS_HDG parameter in real-time (without saving to EEPROM)
 - Display current target heading on OSD (if enabled)
-- Update OSD display in real-time as pilot adjusts heading
 
 On Radio Failsafe:
-1. Use last known heading from RC channel (if configured), otherwise use FS_COMPASS_HDG
+1. Use the last updated FS_COMPASS_HDG value
 2. Maintain current altitude
 3. Apply configured pitch angle and maintain heading
 4. Continue until manual recovery
@@ -108,7 +110,9 @@ On Radio Failsafe:
 
 ### Pitch Control
 
-- Direct pitch angle command
+- Direct pitch angle command via FS_COMPASS_PITCH parameter
+- Negative values for forward flight, positive values for backward flight
+- Range: -45 to +45 degrees for various flight speeds
 - No position or velocity feedback required
 - Let natural aircraft dynamics determine speed
 

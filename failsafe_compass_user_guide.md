@@ -40,16 +40,27 @@ Using Mission Planner, QGroundControl, or another ground station:
 
 2. **Set the pitch angle (optional):**
    - Find parameter: `FS_COMPASS_PITCH`
-   - Default is 5 degrees (conservative)
-   - Range: 1-20 degrees
-   - Higher values = faster forward flight
+   - Default is -5 degrees (forward flight)
+   - Range: -45 to +45 degrees
+   - Negative values = forward flight (faster with more negative values)
+   - Positive values = backward flight
+   - Example: Set to -15 for aggressive forward flight
 
-3. **Enable the failsafe mode:**
+3. **Configure RC channel for heading adjustment (optional):**
+   - Find parameter: `FS_COMPASS_HDG_CH`
+   - Set to 0 to disable (default)
+   - Set to 5-16 to use CH5-CH16 for heading control
+   - When enabled, you can adjust escape heading during flight:
+     - Full left (-100%): 0 degrees
+     - Center (0%): 180 degrees
+     - Full right (+100%): 360 degrees
+
+4. **Enable the failsafe mode:**
    - Find parameter: `FS_THR_ENABLE`
    - Set value to: `8`
    - Write parameters to save
 
-4. **Note about altitude:**
+5. **Note about altitude:**
    - The drone will maintain its current altitude when failsafe activates
    - No altitude climbing or changes occur
    - Plan your flights accordingly for obstacle clearance
@@ -61,7 +72,7 @@ When your transmitter signal is lost:
 1. **Immediate Response**: The drone detects radio failsafe
 2. **Altitude Hold**: Maintains current altitude (no climbing)
 3. **Turn Phase**: Rotates to face your preset heading using IMU/AHRS data
-4. **Escape Phase**: Pitches forward at configured angle (FS_COMPASS_PITCH) in that direction
+4. **Escape Phase**: Pitches at configured angle (FS_COMPASS_PITCH, negative=forward) in that direction
 5. **Recovery**: Continues until you regain radio control
 
 ## Important Safety Information
@@ -78,7 +89,7 @@ When your transmitter signal is lost:
 ### Pre-flight Checks
 1. **Test your IMU**: Ensure IMU is calibrated and AHRS is working properly
 2. **Check heading**: Verify FS_COMPASS_HDG points to a safe direction
-3. **Check pitch**: Verify FS_COMPASS_PITCH is appropriate for your aircraft
+3. **Check pitch**: Verify FS_COMPASS_PITCH is appropriate for your aircraft (negative=forward, positive=backward)
 4. **Know your area**: Be aware of obstacles in your escape direction at current altitude
 5. **Battery planning**: Ensure you have enough battery for the escape flight
 
@@ -89,6 +100,8 @@ When your transmitter signal is lost:
 - Monitor battery levels closely
 - Have a spotter who can track the drone visually
 - Be aware that heading may drift without compass reference
+- If using RC channel control, practice adjusting heading during normal flight
+- Remember that RC heading adjustments are not saved permanently
 
 ## Regaining Control
 
@@ -140,7 +153,7 @@ When your radio link is restored:
 - Set heading away from course
 - Ensure flying altitude clears gates and obstacles
 - Brief other pilots about escape direction
-- Consider faster pitch angle for quick escape
+- Consider more negative pitch angle for quick escape (e.g., -20 degrees)
 
 ## Summary
 

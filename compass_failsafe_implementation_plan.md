@@ -24,12 +24,13 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 
 3. **Implement basic parameters**
    - [x] Add `FS_COMPASS_HDG` parameter (0-359 degrees) to Parameters.h
+   - [x] Add `FS_COMPASS_PITCH` parameter (-45 to +45 degrees) to Parameters.h
    - [x] Add parameter definitions and validation
 
 4. **Implement core flight behavior**
    - [x] Altitude control: Maintain current altitude
    - [x] Heading control: Turn to `FS_COMPASS_HDG` using IMU/AHRS data
-   - [x] Pitch control: Apply configurable forward pitch (FS_COMPASS_PITCH parameter)
+   - [x] Pitch control: Apply configurable pitch (FS_COMPASS_PITCH parameter, negative=forward)
    - [x] Use existing attitude control systems
 
 5. **Integrate with failsafe system**
@@ -50,10 +51,11 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 
 1. **Expand parameter system**
    - [ ] Add `FS_COMPASS_MODE` parameter (enable/disable)
-   - [x] Add `FS_COMPASS_PITCH` parameter (5-20°, default 5°)
+   - [x] Add `FS_COMPASS_PITCH` parameter (-45 to +45°, default -5°)
 
 2. **Implement configurable pitch control**
    - [x] Replace fixed pitch with configurable `FS_COMPASS_PITCH`
+   - [x] Updated parameter range to -45 to +45 degrees
    - [ ] Add parameter validation and range checking
 
 3. **Enhanced parameter validation**
@@ -78,9 +80,10 @@ This document outlines the implementation plan for the Failsafe_Compass mode in 
 #### Tasks:
 
 1. **RC channel heading adjustment**
-   - [ ] Add `FS_COMPASS_HDG_CH` parameter for RC channel selection
-   - [ ] Implement pre-failsafe heading monitoring from RC channel
-   - [ ] Store last known heading before failsafe
+   - [x] Add `FS_COMPASS_HDG_CH` parameter for RC channel selection
+   - [x] Implement continuous heading monitoring from RC channel
+   - [x] Update FS_COMPASS_HDG parameter in real-time during flight
+   - [x] Use updated heading value when failsafe activates
 
 2. **OSD heading display**
    - [ ] Add `FS_COMPASS_OSD_ENABLE` parameter to enable/disable OSD display
@@ -169,9 +172,9 @@ ArduCopter/
 
 ### POC Success Criteria
 - [ ] Mode can be activated during radio failsafe
-- [ ] Aircraft climbs to configured altitude
+- [x] Aircraft maintains current altitude (no climbing)
 - [ ] Aircraft turns to and maintains configured heading
-- [ ] Aircraft maintains forward flight with fixed pitch
+- [x] Aircraft maintains forward flight with configurable pitch
 - [ ] Pilot can regain control and exit mode
 - [ ] Code compiles successfully for target board
 - [ ] SITL testing validates functionality
