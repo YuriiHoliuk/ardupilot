@@ -1256,7 +1256,8 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @Description: RC channel for adjusting failsafe compass heading during flight. Set to 0 to disable. When enabled, allows pilot to adjust FS_COMPASS_HDG parameter in real-time using RC input.
     // @Values: 0:Disabled,5:Channel5,6:Channel6,7:Channel7,8:Channel8,9:Channel9,10:Channel10,11:Channel11,12:Channel12,13:Channel13,14:Channel14,15:Channel15,16:Channel16
     // @User: Standard
-    // AP_GROUPINFO("FS_COMPASS_HDG_CH", 13, ParametersG2, fs_compass_hdg_ch, 0),
+    AP_GROUPINFO("FS_COMPASS_CH", 13, ParametersG2, fs_compass_ch, 0),
+
 #endif
 
     // ID 62 is reserved for the AP_SUBGROUPEXTENSION

@@ -200,12 +200,12 @@ void Copter::radio_passthrough_to_motors()
 void Copter::update_fs_compass_heading_from_rc()
 {
     // Check if RC channel is configured
-    // if (g2.fs_compass_hdg_ch <= 0 || g2.fs_compass_hdg_ch > RC_Channels::get_valid_channel_count()) {
-    //     return;
-    // }
+    if (g2.fs_compass_ch <= 0 || g2.fs_compass_ch > RC_Channels::get_valid_channel_count()) {
+        return;
+    }
 
     // Get the RC channel
-    RC_Channel *ch = rc().channel(6 - 1);
+    RC_Channel *ch = rc().channel(g2.fs_compass_ch - 1);
 
     if (ch == nullptr) {
         return;
