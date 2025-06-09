@@ -239,9 +239,9 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// Failsafe Compass - fly in predetermined direction using compass only
-#ifndef MODE_FAILSAFE_COMPASS_ENABLED
-# define MODE_FAILSAFE_COMPASS_ENABLED 1
+// IMU Rescue - fly in predetermined direction using IMU only
+#ifndef MODE_IMU_RESCUE_ENABLED
+# define MODE_IMU_RESCUE_ENABLED 1
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

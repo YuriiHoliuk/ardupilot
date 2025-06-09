@@ -1,9 +1,9 @@
 #include "Copter.h"
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
+#if MODE_IMU_RESCUE_ENABLED
 
-// failsafe_compass_init - initialise failsafe compass mode
-bool ModeFailsafeCompass::init(bool ignore_checks)
+// imu_rescue_init - initialise IMU Rescue mode
+bool ModeIMURescue::init(bool ignore_checks)
 {
     // initialize vertical maximum speeds and acceleration
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
@@ -14,15 +14,15 @@ bool ModeFailsafeCompass::init(bool ignore_checks)
         pos_control->init_z_controller();
     }
 
-    // set initial target heading to configured failsafe heading
-    _target_heading_deg = g2.fs_compass_heading;
+    // set initial target heading to configured rescue heading
+    _target_heading_deg = g2.imu_rescue_heading;
 
     return true;
 }
 
-// failsafe_compass_run - runs the failsafe compass mode
+// imu_rescue_run - runs the IMU Rescue mode
 // should be called at 100hz or more
-void ModeFailsafeCompass::run()
+void ModeIMURescue::run()
 {
     // if not armed set throttle to zero and exit immediately
     if (is_disarmed_or_landed()) {
@@ -38,9 +38,8 @@ void ModeFailsafeCompass::run()
     // Send the commanded climb rate to the position controller (We always want to stay at the same altitude)
     pos_control->set_pos_target_z_from_climb_rate_cm(target_climb_rate);
 
-    // Open-loop control: Calculate pitch based on target heading
     // Pitch forward in the direction of the target heading
-    float target_pitch_cd = g2.fs_compass_pitch * 100;  // Use configured pitch angle from parameter
+    float target_pitch_cd = g2.imu_rescue_pitch * 100;  // Use configured pitch angle from parameter
     float target_roll_cd = 0;  // No roll for straight flight
     
     // Calculate target yaw from target heading
@@ -53,4 +52,4 @@ void ModeFailsafeCompass::run()
     pos_control->update_z_controller();
 }
 
-#endif  // MODE_FAILSAFE_COMPASS_ENABLED
+#endif  // MODE_IMU_RESCUE_ENABLED

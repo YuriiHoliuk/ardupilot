@@ -1,8 +1,8 @@
-# ArduCopter Failsafe_Compass Mode Implementation
+# ArduCopter IMU Rescue Mode Implementation
 
 ## Overview
 
-Failsafe_Compass is a minimalistic failsafe mode for ArduCopter that enables the aircraft to fly in a predetermined direction using only IMU data (gyroscope and accelerometer), without requiring GPS, compass, or other positioning systems. This mode activates during radio failsafe events to help the aircraft escape from its current location.
+IMU Rescue is a minimalistic failsafe mode for ArduCopter that enables the aircraft to fly in a predetermined direction using only IMU data (gyroscope and accelerometer), without requiring GPS, compass, or other positioning systems. This mode activates during radio failsafe events to help the aircraft escape from its current location.
 
 ## Core Concept
 
@@ -21,8 +21,8 @@ When radio communication is lost, the aircraft will:
 
 **Features**:
 
-- Single parameter: `FS_COMPASS_HDG` (0-359 degrees)
-- Configurable pitch angle parameter: `FS_COMPASS_PITCH` (range -45 to +45 degrees, default -5 degrees)
+- Single parameter: `IMU_RESCUE_HDG` (0-359 degrees)
+- Configurable pitch angle parameter: `IMU_RESCUE_PITCH` (range -45 to +45 degrees, default -30 degrees)
 - Maintain current altitude - no altitude changes
 - No adjustable parameters during flight
 
@@ -31,8 +31,8 @@ When radio communication is lost, the aircraft will:
 ```
 On Radio Failsafe:
 1. Maintain current altitude
-2. Turn to FS_COMPASS_HDG
-3. Apply FS_COMPASS_PITCH forward pitch
+2. Turn to IMU_RESCUE_HDG
+3. Apply IMU_RESCUE_PITCH forward pitch
 4. Continue until manual recovery
 ```
 
@@ -42,8 +42,8 @@ On Radio Failsafe:
 
 **New Parameters**:
 
-- `FS_COMPASS_HDG`: Target heading (0-359°)
-- `FS_COMPASS_PITCH`: Pitch angle (-45 to +45°, default -5°, negative = forward flight)
+- `IMU_RESCUE_HDG`: Target heading (0-359°)
+- `IMU_RESCUE_PITCH`: Pitch angle (-45 to +45°, default -30°, negative = forward flight)
 
 **Features**:
 
@@ -53,10 +53,10 @@ On Radio Failsafe:
 **Behavior**:
 
 ```
-On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected):
+On Radio Failsafe (if FS_THR_ENABLE=8 failsafe action is selected):
 1. Maintain current altitude
-2. Turn to FS_COMPASS_HDG heading
-3. Apply FS_COMPASS_PITCH forward pitch
+2. Turn to IMU_RESCUE_HDG heading
+3. Apply IMU_RESCUE_PITCH forward pitch
 4. Continue until manual recovery
 ```
 
@@ -66,34 +66,40 @@ On Radio Failsafe (if FS_COMPASS_MODE failsafe action is selected):
 
 **Additional Parameters**:
 
-- `FS_COMPASS_HDG_CH`: RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
-- `FS_COMPASS_OSD_ENABLE`: Enable OSD display of target heading (0=disabled, 1=enabled)
-- `FS_COMPASS_OSD_ITEM`: OSD item slot for heading display (configurable without ground station modification)
+- `IMU_RESCUE_CH`: RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
+- OSD display integration using existing CLIMBEFF OSD item (repurposed to show "IRH:XXX°")
 
 **Features**:
 
-- RC-adjustable heading during flight (continuously updates FS_COMPASS_HDG parameter)
-- Real-time OSD display of configured target heading
+- RC-adjustable heading during flight (continuously updates IMU_RESCUE_HDG parameter)
+- Real-time OSD display of configured target heading via repurposed CLIMBEFF item
 - Live heading updates visible during flight as pilot adjusts RC channel
-- RC input mapping: -100% = 0°, 0% = 180°, +100% = 360°
+- RC input mapping: full range maps to 0-360 degrees
 
 **Enhanced Behavior**:
 
 ```
-During normal flight (when FS_COMPASS_HDG_CH is configured):
+During normal flight (when IMU_RESCUE_CH is configured):
 - Continuously monitor RC channel input
 - Map RC input to heading (0-360 degrees)
-- Update FS_COMPASS_HDG parameter in real-time (without saving to EEPROM)
-- Display current target heading on OSD (if enabled)
+- Update IMU_RESCUE_HDG parameter in real-time (without saving to EEPROM)
+- Display current target heading on OSD as "IRH:XXX°" (if CLIMBEFF OSD item enabled)
 
 On Radio Failsafe:
-1. Use the last updated FS_COMPASS_HDG value
+1. Use the last updated IMU_RESCUE_HDG value
 2. Maintain current altitude
 3. Apply configured pitch angle and maintain heading
 4. Continue until manual recovery
 ```
 
 ## Technical Implementation Notes
+
+### Mode Integration
+
+- New flight mode: `IMU_RESCUE` (mode number 29)
+- Enabled via `MODE_IMU_RESCUE_ENABLED` configuration flag
+- Triggered by `FS_THR_ENABLE = 8` parameter setting
+- Integrated with existing failsafe system
 
 ### Altitude Control
 
@@ -110,15 +116,29 @@ On Radio Failsafe:
 
 ### Pitch Control
 
-- Direct pitch angle command via FS_COMPASS_PITCH parameter
+- Direct pitch angle command via IMU_RESCUE_PITCH parameter
 - Negative values for forward flight, positive values for backward flight
 - Range: -45 to +45 degrees for various flight speeds
 - No position or velocity feedback required
 - Let natural aircraft dynamics determine speed
 
+### RC Channel Integration
+
+- Configurable via `IMU_RESCUE_CH` parameter (0=disabled, 5-16 for channels)
+- Real-time heading adjustment during normal flight
+- Updates parameter in memory only (not saved to EEPROM)
+- Full RC range maps linearly to 0-360 degrees
+
+### OSD Integration
+
+- Repurposed CLIMBEFF OSD item to display IMU Rescue heading
+- Shows "IRH:XXX°" format where XXX is current target heading
+- Only active in ArduCopter builds with IMU_RESCUE enabled
+- No new OSD item creation required
+
 ### State Management
 
-- New flight mode: `FAILSAFE_COMPASS`
+- New flight mode: `IMU_RESCUE`
 - Integrate with existing failsafe system
 - Clear mode exit only through manual pilot intervention
 
@@ -130,6 +150,7 @@ On Radio Failsafe:
 - No position awareness
 - Wind drift not compensated
 - Altitude based only on barometer
+- Heading drift over time without compass
 
 ### Mitigations
 
@@ -142,21 +163,27 @@ On Radio Failsafe:
 
 ### Failsafe System
 
-- Add new failsafe action option
+- Add new failsafe action option (FS_THR_ENABLE = 8)
 - Priority relative to other failsafe modes
 - Compatibility with GCS failsafe
 
 ### Flight Mode System
 
-- Register as new flight mode
+- Register as new flight mode (Number::IMU_RESCUE = 29)
 - Ensure proper mode switching logic
 - Display status to GCS
 
 ### Parameter System
 
-- Group parameters under FS_COMPASS_*
+- Group parameters under IMU_RESCUE_*
 - Set reasonable defaults
 - Validate parameter ranges
+
+### OSD System
+
+- Repurpose existing CLIMBEFF item for heading display
+- Conditional compilation for ArduCopter only
+- Backward compatibility maintained
 
 ## Testing Plan
 
@@ -164,15 +191,15 @@ On Radio Failsafe:
 
 1. Test if a drone flies well in alt hold.
 2. Detect where north is and a safe pitch during that flight.
-3. Hardcode the needed pitch and set the needed heading parameter. Set the mode to some switch.
-4. Fly in the opposite direction. Enable failsafe mode manually.
+3. Configure the needed pitch and set the needed heading parameter. Set FS_THR_ENABLE=8.
+4. Fly in the opposite direction. Trigger radio failsafe.
 5. The drone should go more or less back.
-6. Disable failsafe mode manually.
+6. Regain radio control to exit mode.
 
 ### MVP Testing
 
 1. Parameter validation
-2. Home heading detection (if implemented)
+2. Heading accuracy testing
 3. Various pitch angles
 4. Wind resistance testing
 
@@ -181,7 +208,5 @@ On Radio Failsafe:
 1. RC channel heading adjustment
 2. OSD heading display functionality
 3. Real-time heading updates on OSD
-4. OSD configuration without ground station modification
-5. Timeout and auto-land
-6. Battery failsafe integration
-7. Extended flight duration
+4. Extended flight duration
+5. Battery failsafe integration

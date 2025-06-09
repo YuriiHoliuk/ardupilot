@@ -946,8 +946,8 @@ private:
     void set_throttle_zero_flag(int16_t throttle_control);
     void radio_passthrough_to_motors();
     int16_t get_throttle_mid(void);
-#if MODE_FAILSAFE_COMPASS_ENABLED
-    void update_fs_compass_heading_from_rc();
+#if MODE_IMU_RESCUE_ENABLED
+    void update_imu_rescue_heading_from_rc();
 #endif
 
     // sensors.cpp
@@ -1075,8 +1075,8 @@ private:
 #if MODE_TURTLE_ENABLED
     ModeTurtle mode_turtle;
 #endif
-#if MODE_FAILSAFE_COMPASS_ENABLED
-    ModeFailsafeCompass mode_failsafe_compass;
+#if MODE_IMU_RESCUE_ENABLED
+    ModeIMURescue mode_imu_rescue;
 #endif
 
     // mode.cpp

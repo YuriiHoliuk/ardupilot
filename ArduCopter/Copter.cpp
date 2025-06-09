@@ -526,9 +526,9 @@ void Copter::rc_loop()
     read_radio();
     rc().read_mode_switch();
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
+#if MODE_IMU_RESCUE_ENABLED
     // Update failsafe compass heading from RC channel if configured
-    update_fs_compass_heading_from_rc();
+    update_imu_rescue_heading_from_rc();
 #endif
 }
 

@@ -224,7 +224,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Param: FS_THR_ENABLE
     // @DisplayName: Throttle Failsafe Enable
     // @Description: The throttle failsafe allows you to configure a software failsafe activated by a setting on the throttle input channel
-    // @Values:  0:Disabled,1:Enabled always RTL,2:Enabled Continue with Mission in Auto Mode (Removed in 4.0+),3:Enabled always Land,4:Enabled always SmartRTL or RTL,5:Enabled always SmartRTL or Land,6:Enabled Auto DO_LAND_START or RTL,7:Enabled always Brake or Land,8:Enabled Compass Failsafe
+    // @Values:  0:Disabled,1:Enabled always RTL,2:Enabled Continue with Mission in Auto Mode (Removed in 4.0+),3:Enabled always Land,4:Enabled always SmartRTL or RTL,5:Enabled always SmartRTL or Land,6:Enabled Auto DO_LAND_START or RTL,7:Enabled always Brake or Land,8:Enabled IMU Rescue
     // @User: Standard
     GSCALAR(failsafe_throttle,  "FS_THR_ENABLE",   FS_THR_ENABLED_ALWAYS_RTL),
 
@@ -1232,31 +1232,31 @@ const AP_Param::GroupInfo ParametersG2::var_info2[] = {
     // @User: Advanced
     AP_GROUPINFO("FS_EKF_FILT", 8, ParametersG2, fs_ekf_filt_hz, FS_EKF_FILT_DEFAULT),
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
-    // @Param: FS_COMPASS_HDG
-    // @DisplayName: Failsafe Compass Heading
-    // @Description: Target heading in degrees (0-359) for failsafe compass mode. Aircraft will turn to and maintain this heading when radio failsafe triggers and this mode is enabled
+#if MODE_IMU_RESCUE_ENABLED
+    // @Param: IMU_RESCUE_HDG
+    // @DisplayName: IMU Rescue Heading
+    // @Description: Target heading in degrees (0-359) for IMU Rescue mode. Aircraft will turn to and maintain this heading when radio failsafe triggers and this mode is enabled
     // @Units: deg
     // @Range: 0 359
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("FS_COMPASS_HDG", 11, ParametersG2, fs_compass_heading, 180),
+    AP_GROUPINFO("IMU_RESCUE_HDG", 11, ParametersG2, imu_rescue_heading, 180),
 
-    // @Param: FS_COMPASS_PITCH
-    // @DisplayName: Failsafe Compass Pitch Angle
-    // @Description: Pitch angle in degrees for forward flight in failsafe compass mode. Negative values pitch forward, positive values pitch backward. Controls the speed of travel.
+    // @Param: IMU_RESCUE_PITCH
+    // @DisplayName: IMU Rescue Pitch Angle
+    // @Description: Pitch angle in degrees for forward flight in IMU Rescue mode. Negative values pitch forward, positive values pitch backward. Controls the speed of travel.
     // @Units: deg
     // @Range: -45 45
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("FS_COMPASS_PITCH", 12, ParametersG2, fs_compass_pitch, -30),
+    AP_GROUPINFO("IMU_RESCUE_PITCH", 12, ParametersG2, imu_rescue_pitch, -30),
 
-    // @Param: FS_COMPASS_HDG_CH
-    // @DisplayName: Failsafe Compass Heading RC Channel
-    // @Description: RC channel for adjusting failsafe compass heading during flight. Set to 0 to disable. When enabled, allows pilot to adjust FS_COMPASS_HDG parameter in real-time using RC input.
+    // @Param: IMU_RESCUE_HDG_CH
+    // @DisplayName: IMU Rescue Heading RC Channel
+    // @Description: RC channel for adjusting IMU Rescue heading during flight. Set to 0 to disable. When enabled, allows pilot to adjust IMU_RESCUE_HDG parameter in real-time using RC input.
     // @Values: 0:Disabled,5:Channel5,6:Channel6,7:Channel7,8:Channel8,9:Channel9,10:Channel10,11:Channel11,12:Channel12,13:Channel13,14:Channel14,15:Channel15,16:Channel16
     // @User: Standard
-    AP_GROUPINFO("FS_COMPASS_CH", 13, ParametersG2, fs_compass_ch, 0),
+    AP_GROUPINFO("IMU_RESCUE_CH", 13, ParametersG2, imu_rescue_ch, 0),
 
 #endif
 

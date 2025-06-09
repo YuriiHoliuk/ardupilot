@@ -193,19 +193,19 @@ void Copter::radio_passthrough_to_motors()
                                   channel_yaw->norm_input());
 }
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
+#if MODE_IMU_RESCUE_ENABLED
 /*
-  update failsafe compass heading from RC channel
+  update IMU Rescue heading from RC channel
  */
-void Copter::update_fs_compass_heading_from_rc()
+void Copter::update_imu_rescue_heading_from_rc()
 {
     // Check if RC channel is configured
-    if (g2.fs_compass_ch <= 0 || g2.fs_compass_ch > RC_Channels::get_valid_channel_count()) {
+    if (g2.imu_rescue_ch <= 0 || g2.imu_rescue_ch > RC_Channels::get_valid_channel_count()) {
         return;
     }
 
     // Get the RC channel
-    RC_Channel *ch = rc().channel(g2.fs_compass_ch - 1);
+    RC_Channel *ch = rc().channel(g2.imu_rescue_ch - 1);
 
     if (ch == nullptr) {
         return;
@@ -233,9 +233,9 @@ void Copter::update_fs_compass_heading_from_rc()
         new_heading = 359.0f; // Cap at 359 to avoid 360
     }
     
-    g2.fs_compass_heading.set_and_save(new_heading);  // This saves to EEPROM
+    // g2.imu_rescue_heading.set_and_save(new_heading);  // This saves to EEPROM
     // Replace with this one to avoid setting to EEPROM after testing
-    // g2.fs_compass_heading.set(new_heading);
+    g2.imu_rescue_heading.set(new_heading);
 }
 #endif
 

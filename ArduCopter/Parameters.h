@@ -665,11 +665,11 @@ public:
     AP_Int16                failsafe_dr_timeout;
     AP_Float                surftrak_tc;
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
+#if MODE_IMU_RESCUE_ENABLED
     // Failsafe compass heading parameter
-    AP_Int16                fs_compass_heading;     // Target heading in degrees (0-359)
-    AP_Float                fs_compass_pitch;       // Pitch angle in degrees (-45 to +45, negative=forward)
-    AP_Int8                 fs_compass_ch;          // RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
+    AP_Int16                imu_rescue_heading;     // Target heading in degrees (0-359)
+    AP_Float                imu_rescue_pitch;       // Pitch angle in degrees (-45 to +45, negative=forward)
+    AP_Int8                 imu_rescue_ch;          // RC channel for heading adjustment (0=disabled, 5-16 for CH5-CH16)
 #endif
 
     // ramp time of throttle during take-off

@@ -100,7 +100,7 @@ public:
         AUTOROTATE =   26,  // Autonomous autorotation
         AUTO_RTL =     27,  // Auto RTL, this is not a true mode, AUTO will report as this mode if entered to perform a DO_LAND_START Landing sequence
         TURTLE =       28,  // Flip over after crash
-        FAILSAFE_COMPASS = 29,  // Failsafe mode using compass heading only
+        IMU_RESCUE = 29,  // Failsafe mode using compass heading only
 
         // Mode number 127 reserved for the "drone show mode" in the Skybrush
         // fork at https://github.com/skybrush-io/ardupilot
@@ -2053,13 +2053,13 @@ private:
 };
 #endif
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
-class ModeFailsafeCompass : public Mode {
+#if MODE_IMU_RESCUE_ENABLED
+class ModeIMURescue : public Mode {
 
 public:
     // inherit constructor
     using Mode::Mode;
-    Number mode_number() const override { return Number::FAILSAFE_COMPASS; }
+    Number mode_number() const override { return Number::IMU_RESCUE; }
 
     bool init(bool ignore_checks) override;
     void run() override;
@@ -2076,8 +2076,8 @@ public:
     float crosstrack_error() const override { return 0.0f; }
 
 protected:
-    const char *name() const override { return "FAILSAFE_COMPASS"; }
-    const char *name4() const override { return "FSCP"; }
+    const char *name() const override { return "IMU_RESCUE"; }
+    const char *name4() const override { return "IMUR"; }
 
 private:
     // Target heading in degrees

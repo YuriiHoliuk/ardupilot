@@ -179,9 +179,9 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
-#if MODE_FAILSAFE_COMPASS_ENABLED
-        case Mode::Number::FAILSAFE_COMPASS:
-            return &mode_failsafe_compass;
+#if MODE_IMU_RESCUE_ENABLED
+        case Mode::Number::IMU_RESCUE:
+            return &mode_imu_rescue;
 #endif
 
         default:
